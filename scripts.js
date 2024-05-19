@@ -1,9 +1,6 @@
 // Import the book data, authors, genres, and the number of books per page
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
 
-import './book-preview.js'; // Import the book-preview.js file
-
-
 // Defining a class to represent a book
 class Book {
   constructor(id, title, author, description, published, image, genres) {
@@ -29,26 +26,31 @@ const authorObjects = Object.entries(authors).map(([id, name]) => ({ id, name })
 // Creating an array of genre objects from the provided genre data
 const genreObjects = Object.entries(genres).map(([id, name]) => ({ id, name }));
 
+// Function to render a book preview element
+function renderBookPreview(book) {
+  const element = document.createElement('button');
+  element.classList.add('preview');
+  element.setAttribute('data-preview', book.id);
+
+  element.innerHTML = `
+    <img class="preview__image" src="${book.image}" />
+    <div class="preview__info">
+      <h3 class="preview__title">${book.title}</h3>
+      <div class="preview__author">${authors[book.author]}</div>
+    </div>
+  `;
+
+  return element;
+}
 
 // Function to render a list of book previews in a container
-
-
 function renderBookList(bookList, container) {
   const fragment = document.createDocumentFragment();
 
-  // Loop through the list of books
   for (const book of bookList) {
-    // Create a new instance of the 'book-preview' Web Component
-    const previewElement = document.createElement('book-preview');
-    previewElement.authors = authors; // Pass the authors object as a property
-    // Set the 'book' attribute with the JSON string representation of the book object
-    previewElement.setAttribute('book', JSON.stringify(book));
-
-    // Append the preview element to the document fragment
-    fragment.appendChild(previewElement);
+    fragment.appendChild(renderBookPreview(book));
   }
 
-  // Append the document fragment to the container element
   container.appendChild(fragment);
 }
 
@@ -72,7 +74,7 @@ function renderFilterOptions(options, container, defaultLabel) {
 }
 
 // Initialize the book list and filter options
- let page = 1; // Current page number for pagination
+let page = 1; // Current page number for pagination
 let matches = bookObjects; // Array of books to be displayed (initially all books)
 
 const listContainer = document.querySelector('[data-list-items]'); // Container for book list
@@ -97,7 +99,8 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 
 // Update the "Show more" button text and disabled state
 document.querySelector('[data-list-button]').innerText = `Show more (${books.length - BOOKS_PER_PAGE})`;
-document.querySelector('[data-list-button]').disabled = matches.length - page * BOOKS_PER_PAGE <= 0;
+document.querySelector('[data-list-button]').disabled = matches.length - page * BOOKS_PER_PAGE > 0;
+
 document.querySelector('[data-list-button]').innerHTML = `
   <span>Show more</span>
   <span class="list__remaining"> (${matches.length - page * BOOKS_PER_PAGE > 0 ? matches.length - page * BOOKS_PER_PAGE : 0})</span>
@@ -173,7 +176,7 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
   }
 
 // Resetting the page number to 1
-let page = 1;
+page = 1;
 
 // Updating the list of matched books with the filtered result
 matches = result;
